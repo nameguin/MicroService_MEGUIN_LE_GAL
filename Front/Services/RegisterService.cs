@@ -21,8 +21,8 @@ namespace Front.Services
         {
             UserCreateModel userregister = new()
             {
-                Name = username,
                 Password = password,
+                Name = username,
                 Email = email,
             };
             

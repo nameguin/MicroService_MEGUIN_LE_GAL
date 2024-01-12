@@ -100,6 +100,7 @@ namespace UserService.Controllers
                 Email = userPayload.Email,
                 Name = userPayload.Name,
             };
+            Console.WriteLine(userPayload.Name + " " + userPayload.Password);
             user.PasswordHash = _passwordHasher.HashPassword(user, userPayload.Password);
 
             _context.User.Add(user);
@@ -142,12 +143,14 @@ namespace UserService.Controllers
             var user = await _context.User.FindAsync(id);
             if (user == null)
             {
+                Console.WriteLine($"not found userService");
                 return NotFound();
             }
 
             _context.User.Remove(user);
             await _context.SaveChangesAsync();
 
+            Console.WriteLine($"c'est bon user Service");
             return NoContent();
         }
 

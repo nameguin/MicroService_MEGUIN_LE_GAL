@@ -13,6 +13,7 @@
                 <Authorized>
                     <p>Hello, @context.User.Identity.Name !</p>
                     <a @onclick="Logout">Logout</a>
+                    <a @onclick="Delete">Delete account</a>
                 </Authorized>
                 <NotAuthorized>
                     <p>You're not connected.</p>
@@ -41,6 +42,15 @@
         await((CustomAuthenticationStateProvider)authStateProvider).Logout();
         // Redirect the user to the login page
         NavigationManager.NavigateTo("/login");
+        
+    }
+
+    private async void Delete()
+    {
+        // Kill the account
+        await((CustomAuthenticationStateProvider)authStateProvider).DeleteAccount();
+        // Redirect the user to the login page
+        NavigationManager.NavigateTo("/register");
         
     }
 }

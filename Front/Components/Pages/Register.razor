@@ -12,7 +12,7 @@
 
 @code {
     private RegisterModel registerModel = new RegisterModel();
-    private string error = "ftyf";
+    private string error = "";
     private async void HandleRegister()
     {
         var tuple = await registerService.CreateUser(registerModel.Username, registerModel.Password, registerModel.Email);

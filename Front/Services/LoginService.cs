@@ -25,10 +25,11 @@ namespace Front.Services
                 Name = username,
                 Pass = password,
             };
+
             var response =  await _httpClient.PostAsJsonAsync("http://localhost:5000/api/User/login", userlogin);
 
             // Check if the response status code is 200 (OK)
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (response.IsSuccessStatusCode)
             {
                 // You can deserialize the response content here if needed
                 var result = await response.Content.ReadFromJsonAsync<UserDTO>();
