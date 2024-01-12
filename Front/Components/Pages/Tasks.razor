@@ -1,13 +1,13 @@
-﻿@page "/weather"
+﻿@page "/tasks"
 @attribute [StreamRendering]
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Tasks</PageTitle>
 
-<h1>Weather</h1>
+<h1>Tasks list</h1>
 
 <p>This component demonstrates showing data.</p>
 
-@if (forecasts == null)
+@if (tasks == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -16,20 +16,18 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
                 <th>Summary</th>
+                <th>Done</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var task in tasks)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@task.text</td>
+                    <td>@task.isDone</td>
+                    <td>@task.Date</td>
                 </tr>
             }
         </tbody>
@@ -37,7 +35,7 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private Task[]? tasks;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,7 +43,7 @@ else
         await Task.Delay(500);
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        var text = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
         forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
             Date = startDate.AddDays(index),
@@ -54,11 +52,10 @@ else
         }).ToArray();
     }
 
-    private class WeatherForecast
+    private class Task
     {
         public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public string text { get; set; }
+        public bool isDone { get; set; }
     }
 }

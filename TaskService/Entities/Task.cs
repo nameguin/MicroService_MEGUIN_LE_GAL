@@ -8,10 +8,16 @@ namespace TaskService.Entities
 
         public bool IsDone { get; set; }
 
+        public DateTime Date { get; set; }
+
+        public DateTime Deadline { get; set; }
+
     }
     public class TaskCreate
     {
         public required string Text { get; set; }
         public bool IsDone { get; set; }
+        public DateTime Date { get; set; }
+        public DateTime Deadline { get; set; }
     }
 }
