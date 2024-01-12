@@ -1,0 +1,36 @@
+@page "/register"
+@inject NavigationManager NavigationManager
+@inject RegisterService registerService
+
+<EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+    <InputText @bind-Value="registerModel.Username" />
+    <InputText @bind-Value="registerModel.Password" type="password" />
+    <InputText @bind-Value="registerModel.Email" type="email" />
+    <button type="submit">Register</button>
+    @error
+</EditForm>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+    private string error = "ftyf";
+    private async void HandleRegister()
+    {
+        var tuple = await registerService.CreateUser(registerModel.Username, registerModel.Password, registerModel.Email);
+        if (tuple.user != null)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            error = tuple.error;
+            StateHasChanged();
+        }
+    }
+
+    private class RegisterModel
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string Email { get; set; } = "";
+    }
+}
