@@ -1,10 +1,12 @@
 using Front.Entities;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Security.Claims;
 
 namespace Front.Services
@@ -12,35 +14,101 @@ namespace Front.Services
     public class TaskService
     {
         private readonly HttpClient _httpClient;
+        private ProtectedLocalStorage _sessionStorage;
 
-        public TaskService(HttpClient httpClient)
+        public TaskService(HttpClient httpClient, ProtectedLocalStorage sessionStorage)
         {
             _httpClient = httpClient;
+            _sessionStorage = sessionStorage;
         }
 
-        public async Task<(TaskModel? user, string error)> CreateTask(string text, bool done, DateTime date)
+        public async Task<TaskModel[]> GetAllTasks()
         {
-            TaskModel taskModel = new()
+            try
             {
-                Text = text,
-                IsDone = done,
-                Date = date,
-            };
+                 var jwt = await _sessionStorage.GetAsync<string>("jwt");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:5000/api/Task/create", taskModel);
+                HttpResponseMessage response = await _httpClient.GetAsync("http://localhost:5000/api/Task");
 
-            // Check if the response status code is 200 (OK)
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<TaskModel[]>();
+
+                    return result ?? Array.Empty<TaskModel>();
+                }
+                else
+                {
+                    return Array.Empty<TaskModel>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetAllTasks: {ex.Message}");
+                return Array.Empty<TaskModel>();
+            }
+        }
+
+        public async Task<TaskModel?> CreateTask()
+        {
+            var task = new TaskCreateModel() { IsDone = false, Text = "Empty" };
+            var jwt = await _sessionStorage.GetAsync<string>("jwt");
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
+
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("http://localhost:5000/api/Task/create", task);
+
+            Console.WriteLine(response.Content.ToString());
+            Console.WriteLine(response.StatusCode);
+
             if (response.IsSuccessStatusCode)
             {
-                // You can deserialize the response content here if needed
                 var result = await response.Content.ReadFromJsonAsync<TaskModel>();
-                return (result, "");
+
+                return result;
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return (null, error);
+                return null;
             }
         }
+
+        public async Task<TaskModel?> UpdateTask(TaskModel todo)
+        {
+            var task = new TaskCreateModel() { IsDone = todo.IsDone, Text = todo.Text };
+
+            Console.WriteLine($"update todo {todo.Id} {todo.IsDone} {todo.Text}");
+            var jwt = await _sessionStorage.GetAsync<string>("jwt");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/Task/update/{todo.Id}", task);
+
+            Console.WriteLine(response.Content.ToString());
+            Console.WriteLine(response.StatusCode);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<TaskModel>();
+
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task DeleteTask(int id)
+        {
+            var jwt = await _sessionStorage.GetAsync<string>("jwt");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"http://localhost:5000/api/Task/delete/{id}");
+
+            Console.WriteLine(response.Content.ToString());
+            Console.WriteLine(response.StatusCode);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Error deleting");
+            }
+        }
+
     }
 }

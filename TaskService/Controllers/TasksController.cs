@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using TaskService.Entities;
+using TaskService.Service;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -7,50 +9,71 @@ namespace TaskService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TasksController : ControllerBase
+    public class TaskController : ControllerBase
     {
 
-        private List<Entities.Task> _tasks;
-        private int _taskIndex = 0;
+        private TaskDb TaskDb { get; set; }
 
-        public TasksController()
+        public TaskController(TaskDb taskDb)
         {
-            _tasks = new List<Entities.Task>();
+            TaskDb = taskDb;
         }
 
-        // GET: api/Tasks
-        [HttpGet]
-        public IEnumerable<Entities.Task> Get()
+        // GET: api/Tasks/list/:UserId
+        [HttpGet("list/{UserId}")]
+        public ActionResult<IEnumerable<Entities.TaskModel>> Get(int UserId)
         {
-            return _tasks;
+            List<Entities.TaskModel>? tasks;
+            if (TaskDb.Tasks.TryGetValue(UserId, out tasks) && tasks != null)
+            {
+                return tasks;
+            }
+            else
+            {
+                TaskDb.Tasks[UserId] = new List<Entities.TaskModel>();
+                return Ok(TaskDb.Tasks[UserId]);
+            }
         }
 
-        // GET api/Tasks/5
-        [HttpGet("{id}")]
-        public Entities.Task? Get(int id)
+        // POST api/Tasks/create
+        [HttpPost("create/{UserId}")]
+        public ActionResult<Entities.TaskModel> CreateTask(int UserId, TaskCreate task)
         {
-            return _tasks.Find(t => t.Id == id);
-        }
+            List<Entities.TaskModel>? tasks;
+            if (!TaskDb.Tasks.TryGetValue(UserId, out tasks) || tasks == null)
+            {
+                tasks = new List<Entities.TaskModel>();
+                TaskDb.Tasks[UserId] = tasks;
+            }
+            var index = 0;
+            if (tasks.Count > 0)
+            {
+                index = tasks.Max(t => t.Id) + 1;
+            }
 
-        // POST api/Tasks
-        [HttpPost]
-        public void CreateTask(TaskCreate task)
-        {
-            var index = _taskIndex++;
-            _tasks.Add(new Entities.Task
+            var NewTask = new Entities.TaskModel
             {
                 Id = index,
                 IsDone = task.IsDone,
                 Text = task.Text
-            });
+            };
+
+            TaskDb.Tasks[UserId].Add(NewTask);
+            return Ok(NewTask);
         }
 
         // PUT api/Tasks/5
-        [HttpPut("{id}")]
-        public ActionResult<Entities.Task> Put(int id, TaskCreate taskUpdate)
+        [HttpPut("update/{UserId}/{id}")]
+        public ActionResult<Entities.TaskModel> Put(int UserId, int id, TaskCreate taskUpdate)
         {
-            var task = _tasks.Find(t => t.Id == id);
-            if(task == null)
+            List<Entities.TaskModel>? tasks;
+            if (!TaskDb.Tasks.TryGetValue(UserId, out tasks) || tasks == null)
+            {
+                tasks = new List<TaskModel>();
+                TaskDb.Tasks[UserId] = tasks;
+            }
+            var task = tasks.Find(t => t.Id == id);
+            if (task == null)
             {
                 return NotFound();
             }
@@ -61,15 +84,21 @@ namespace TaskService.Controllers
         }
 
         // DELETE api/Tasks/5
-        [HttpDelete("{id}")]
-        public ActionResult<bool> Delete(int id)
+        [HttpDelete("delete/{UserId}/{id}")]
+        public ActionResult<bool> Delete(int UserId, int id)
         {
-            var index = _tasks.FindIndex(t => t.Id == id);
-            if(index == -1)
+            List<Entities.TaskModel>? tasks;
+            if (!TaskDb.Tasks.TryGetValue(UserId, out tasks) || tasks == null)
+            {
+                tasks = new List<TaskModel>();
+                TaskDb.Tasks[UserId] = tasks;
+            }
+            var index = tasks.FindIndex(t => t.Id == id);
+            if (index == -1)
             {
                 return NotFound();
             }
-            _tasks.RemoveAt(index);
+            tasks.RemoveAt(index);
             return Ok(true);
         }
     }

@@ -91,7 +91,7 @@ namespace Front.Services
             } else {
                 _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             }
-            return await Task.FromResult(new AuthenticationState(_currentUser));
+            return await System.Threading.Tasks.Task.FromResult(new AuthenticationState(_currentUser));
         }
     }
 }

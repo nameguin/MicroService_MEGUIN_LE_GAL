@@ -1,5 +1,5 @@
 ﻿
-namespace UserService.Entities
+namespace GatewayService.Entities
 {
     public class UserDTO
     {
@@ -18,5 +18,11 @@ namespace UserService.Entities
         public required string Password { get; set; }
         public required string Name { get; set; }
         public required string Email { get; set; }
+    }
+
+    public class JWTAndUser
+    {
+        public required string Token { get; set; }
+        public required UserDTO User { get; set; }
     }
 }

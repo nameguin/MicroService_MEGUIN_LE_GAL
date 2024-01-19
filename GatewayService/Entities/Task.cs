@@ -1,4 +1,4 @@
-namespace TaskService.Entities
+namespace GatewayService.Entities
 {
     public class TaskModel
     {
@@ -13,7 +13,7 @@ namespace TaskService.Entities
         public DateTime Deadline { get; set; }
 
     }
-    public class TaskCreate
+    public class TaskCreateModel
     {
         public required string Text { get; set; }
         public bool IsDone { get; set; }

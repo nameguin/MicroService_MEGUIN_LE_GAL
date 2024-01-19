@@ -1,24 +1,28 @@
 ﻿using Front.Entities;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Security.Claims;
 
 namespace Front.Services
 {
-    public class LoginService : ControllerBase
+    public class LoginService
     {
         private readonly HttpClient _httpClient;
+        private ProtectedLocalStorage _sessionStorage;
 
-        public LoginService(HttpClient httpClient)
+        public LoginService(HttpClient httpClient, ProtectedLocalStorage sessionStorage)
         {
             _httpClient = httpClient;
+            _sessionStorage = sessionStorage;
         }
 
-        public async Task<UserDTO?> AuthenticateUser(string username, string password)
+    public async Task<UserDTO?> AuthenticateUser(string username, string password)
         {
             UserLogin userlogin = new()
             {
@@ -31,9 +35,13 @@ namespace Front.Services
             // Check if the response status code is 200 (OK)
             if (response.IsSuccessStatusCode)
             {
-                // You can deserialize the response content here if needed
-                var result = await response.Content.ReadFromJsonAsync<UserDTO>();
-                return result;
+                var result = await response.Content.ReadFromJsonAsync<JWTAndUser>();
+
+                if (result != null && result.User != null)
+                {
+                    await _sessionStorage.SetAsync("jwt", result.Token);
+                    return result.User;
+                }
             }
             return null;
         }
