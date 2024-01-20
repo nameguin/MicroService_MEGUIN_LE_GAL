@@ -120,7 +120,9 @@ namespace GatewayService.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         // DELETE : api/User/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {

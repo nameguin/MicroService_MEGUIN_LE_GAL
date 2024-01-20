@@ -26,8 +26,8 @@ namespace Front.Services
         {
             try
             {
-                 var jwt = await _sessionStorage.GetAsync<string>("jwt");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
+                 var token = await _sessionStorage.GetAsync<string>("jwt");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
                 HttpResponseMessage response = await _httpClient.GetAsync("http://localhost:5000/api/Task");
 
@@ -51,61 +51,91 @@ namespace Front.Services
 
         public async Task<TaskModel?> CreateTask()
         {
-            var task = new TaskCreateModel() { IsDone = false, Text = "Empty" };
-            var jwt = await _sessionStorage.GetAsync<string>("jwt");
+            var token = await _sessionStorage.GetAsync<string>("jwt");
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
-
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("http://localhost:5000/api/Task/create", task);
-
-            Console.WriteLine(response.Content.ToString());
-            Console.WriteLine(response.StatusCode);
-
-            if (response.IsSuccessStatusCode)
+            if (token.Success)
             {
-                var result = await response.Content.ReadFromJsonAsync<TaskModel>();
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
-                return result;
+                var task = new TaskCreateModel() { IsDone = false, Text = "Empty" };
+                HttpResponseMessage response = await _httpClient.PostAsJsonAsync("http://localhost:5000/api/Task/create", task);
+
+                Console.WriteLine(response.Content.ToString());
+                Console.WriteLine(response.StatusCode);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<TaskModel>();
+
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
+                Console.WriteLine("Erreur : Token JWT impossible à récupérer");
                 return null;
             }
         }
 
         public async Task<TaskModel?> UpdateTask(TaskModel todo)
         {
-            var task = new TaskCreateModel() { IsDone = todo.IsDone, Text = todo.Text };
 
-            Console.WriteLine($"update todo {todo.Id} {todo.IsDone} {todo.Text}");
-            var jwt = await _sessionStorage.GetAsync<string>("jwt");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
-            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/Task/update/{todo.Id}", task);
+            var token = await _sessionStorage.GetAsync<string>("jwt");
 
-            Console.WriteLine(response.Content.ToString());
-            Console.WriteLine(response.StatusCode);
-            if (response.IsSuccessStatusCode)
+            if (token.Success)
             {
-                var result = await response.Content.ReadFromJsonAsync<TaskModel>();
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
-                return result;
+                var task = new TaskCreateModel() { IsDone = todo.IsDone, Text = todo.Text };
+
+                Console.WriteLine($"update todo {todo.Id} {todo.IsDone} {todo.Text}");
+                HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/Task/update/{todo.Id}", task);
+
+                Console.WriteLine(response.Content.ToString());
+                Console.WriteLine(response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<TaskModel>();
+
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
+                Console.WriteLine("Erreur : Token JWT impossible à récupérer");
                 return null;
             }
         }
 
         public async Task DeleteTask(int id)
         {
-            var jwt = await _sessionStorage.GetAsync<string>("jwt");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
-            HttpResponseMessage response = await _httpClient.DeleteAsync($"http://localhost:5000/api/Task/delete/{id}");
 
-            Console.WriteLine(response.Content.ToString());
-            Console.WriteLine(response.StatusCode);
-            if (!response.IsSuccessStatusCode)
+            var token = await _sessionStorage.GetAsync<string>("jwt");
+
+            if (token.Success)
             {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"http://localhost:5000/api/Task/delete/{id}");
+
+                Console.WriteLine(response.Content.ToString());
+                Console.WriteLine(response.StatusCode);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception("Error deleting");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Erreur : Token JWT impossible à récupérer");
                 throw new Exception("Error deleting");
             }
         }
