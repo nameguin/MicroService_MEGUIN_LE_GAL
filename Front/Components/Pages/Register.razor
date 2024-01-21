@@ -2,11 +2,18 @@
 @inject NavigationManager NavigationManager
 @inject RegisterService registerService
 
+<PageTitle>Register Page</PageTitle>
+
+<h1>Sign up Now !</h1>
+
+<br>
+<br>
+
 <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
     <InputText @bind-Value="registerModel.Username" />
     <InputText @bind-Value="registerModel.Password" type="password" />
     <InputText @bind-Value="registerModel.Email" type="email" />
-    <button type="submit">Register</button>
+    <button type="submit">Sign up !</button>
     @error
 </EditForm>
 

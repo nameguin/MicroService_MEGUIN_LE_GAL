@@ -11,12 +11,21 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
-                    <p>Hello, @context.User.Identity.Name !</p>
-                    <a @onclick="Logout">Logout</a>
-                    <a @onclick="Delete">Delete account</a>
+                    <div>
+                        <h3>Hello, @context.User.Identity.Name !</h3>
+                    </div>
+                    <a class="nav-link">
+                        <button class="btn btn-outline-secondary" @onclick="Logout">Logout</button>
+                    </a>
+                    <a class="nav-link" href="account">
+                        <button class="btn btn-outline-secondary">Your Account</button>
+                    </a>
                 </Authorized>
                 <NotAuthorized>
-                    <p>You're not connected.</p>
+                    <h4>You're not connected.</h4>
+                    <a class="nav-link" href="login">
+                        <button class="btn btn-outline-secondary">Sign in</button>
+                    </a>
                 </NotAuthorized>
             </AuthorizeView>
             
