@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -24,6 +25,62 @@ namespace GatewayService.Controllers
         public UserController(IHttpClientFactory httpClientFactory, HttpClient client)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        [Authorize]
+        [HttpGet("users")]
+        public async Task<ActionResult> GetAllUsersAsync()
+        {
+            // Create an HttpClient instance using the factory
+            using (var client = _httpClientFactory.CreateClient())
+            {
+                client.BaseAddress = new System.Uri("http://localhost:5001/");
+
+                /*
+                var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (UserId == null) return Unauthorized();
+                */
+
+                HttpResponseMessage response = await client.GetAsync($"api/Users");
+
+                // Check if the response status code is 2XX
+                if (response.IsSuccessStatusCode)
+                {
+                    var users = await response.Content.ReadFromJsonAsync<Entities.UserDTO[]>();
+                    return Ok(users);
+                }
+                else
+                {
+                    return BadRequest("GetAllUsersAsync failed");
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<UserDTO>> GetMyUserAsync()
+        {
+            // Create an HttpClient instance using the factory
+            using (var client = _httpClientFactory.CreateClient())
+            {
+                client.BaseAddress = new System.Uri("http://localhost:5001/");
+
+                var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (UserId == null) return Unauthorized();
+
+                HttpResponseMessage response = await client.GetAsync($"api/Users/{UserId}");
+
+                // Check if the response status code is 2XX
+                if (response.IsSuccessStatusCode)
+                {
+                    var user = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    return Ok(user);
+                }
+                else
+                {
+                    return BadRequest("GetMyUserAsync failed");
+                }
+            }
         }
 
         // api/User/login
@@ -143,7 +200,9 @@ namespace GatewayService.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         // DELETE : api/User/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {

@@ -2,9 +2,11 @@
 @inject TaskService taskService
 @inject Microsoft.JSInterop.IJSRuntime JSRuntime
 
-<PageTitle>Task list</PageTitle>
+<AuthorizeView Roles="User">
+    <Authorized>
+        <PageTitle>Task list</PageTitle>
 
-<h1>Task list</h1>
+        <h1>Task list</h1>
 
 @if (tasks == null)
 {
@@ -116,6 +118,13 @@ else
         </tbody>
     </table>
 }
+
+    </Authorized>
+
+    <NotAuthorized>
+        Not Logged in
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private bool showAddTaskForm = false;
