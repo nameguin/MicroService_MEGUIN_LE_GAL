@@ -22,7 +22,7 @@ namespace Front.Services
             _sessionStorage = sessionStorage;
         }
 
-    public async Task<UserDTO?> AuthenticateUser(string username, string password)
+    public async Task<(UserDTO? user, string error)> AuthenticateUser(string username, string password)
         {
             UserLogin userlogin = new()
             {
@@ -40,10 +40,11 @@ namespace Front.Services
                 if (result != null && result.User != null)
                 {
                     await _sessionStorage.SetAsync("jwt", result.Token);
-                    return result.User;
+                    return (result.User, "");
                 }
             }
-            return null;
+            var error = await response.Content.ReadAsStringAsync();
+            return (null, error);
         }
     }
 }

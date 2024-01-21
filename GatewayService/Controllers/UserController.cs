@@ -8,6 +8,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.SignalR;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 
 namespace GatewayService.Controllers
@@ -28,6 +30,18 @@ namespace GatewayService.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<JWTAndUser>> Login(UserLogin model)
         {
+            if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The username must only contain alphanumeric characters.");
+
+            if (!model.Pass.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The password must only contain alphanumeric characters.");
+
+            if (string.IsNullOrWhiteSpace(model.Name))
+                return BadRequest("Username can't be empty.");
+
+            if (string.IsNullOrWhiteSpace(model.Pass))
+                return BadRequest("Password can't be empty.");
+
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
             {
@@ -48,7 +62,7 @@ namespace GatewayService.Controllers
                 }
                 else
                 {
-                    return BadRequest("Login failed");
+                    return BadRequest("Login failed. Please check your username and password.");
                 }
             }
         }
@@ -59,10 +73,19 @@ namespace GatewayService.Controllers
         {
 
             if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("Invalid name");
-            if (!model.Password.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("Invalid pass");
+                return BadRequest("The username must only contain alphanumeric characters.");
 
+            if (!model.Password.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The password must only contain alphanumeric characters.");
+
+            if (string.IsNullOrWhiteSpace(model.Name))
+                return BadRequest("Username can't be empty.");
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+                return BadRequest("Password can't be empty.");
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+                return BadRequest("Mail can't be empty.");
 
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())

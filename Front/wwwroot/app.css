@@ -49,3 +49,109 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.imgStatus {
+    width: 50px;
+    height: 50px;
+}
+
+.description-cell
+{
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
+.add-task-form {
+    width: 30%;
+    padding: 15px;
+    margin-top: -10px;
+}
+.input-add-task-form {
+    display: flex;
+    flex-direction: column;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+}
+
+.input-add-form {
+    width: 50%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+    .input-add-form label {
+        margin-bottom: 5px;
+    }
+
+    .input-add-form input {
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+.add-task-form textarea {
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 82%;
+    box-sizing: border-box;
+}
+
+.add-task-form label {
+    margin-left: 10px;
+}
+
+.add-task-form button {
+    margin-left: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 30%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+
+.add-task-form button:hover {
+    background-color: #218838;
+}
+
+.log-container {
+    margin: auto;
+    max-width: 400px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.log-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.log-submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.log-submit:hover {
+    background-color: #0056b3;
+}
+
+.log-h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+

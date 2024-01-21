@@ -2,17 +2,22 @@
 @inject NavigationManager NavigationManager
 @inject RegisterService registerService
 
-<EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-    <InputText @bind-Value="registerModel.Username" />
-    <InputText @bind-Value="registerModel.Password" type="password" />
-    <InputText @bind-Value="registerModel.Email" type="email" />
-    <button type="submit">Register</button>
-    @error
+<EditForm Model="@registerModel" OnValidSubmit="HandleRegister" class="log-container">
+    <h1 class="log-h1">Register</h1>
+    <InputText @bind-Value="registerModel.Username" class="log-input" placeholder="Username" />
+    <InputText @bind-Value="registerModel.Password" type="password" class="log-input" placeholder="Password" />
+    <InputText @bind-Value="registerModel.Email" type="email" class="log-input" placeholder="xxx@example.com" />
+    <button type="submit" class="log-submit">Submit</button>
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <p class="text-danger">@error</p>
+    }
 </EditForm>
 
 @code {
     private RegisterModel registerModel = new RegisterModel();
     private string error = "";
+
     private async void HandleRegister()
     {
         var tuple = await registerService.CreateUser(registerModel.Username, registerModel.Password, registerModel.Email);

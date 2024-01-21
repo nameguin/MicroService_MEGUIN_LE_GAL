@@ -55,7 +55,9 @@ namespace TaskService.Controllers
             {
                 Id = index,
                 IsDone = task.IsDone,
-                Text = task.Text
+                Title = task.Title,
+                Description = task.Description,
+                Deadline  = task.Deadline,
             };
 
             TaskDb.Tasks[UserId].Add(NewTask);
@@ -77,8 +79,10 @@ namespace TaskService.Controllers
             {
                 return NotFound();
             }
-            task.Text = taskUpdate.Text;
+            task.Title = taskUpdate.Title;
+            task.Description = taskUpdate.Description;
             task.IsDone = taskUpdate.IsDone;
+            task.Deadline = taskUpdate.Deadline;
 
             return Ok(task);
         }

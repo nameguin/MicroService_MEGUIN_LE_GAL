@@ -4,28 +4,33 @@
 @inject LoginService loginService
 @inject AuthenticationStateProvider authStateProvider
 
-<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-    <InputText @bind-Value="loginModel.Username" />
-    <InputText @bind-Value="loginModel.Password" type="password" />
-    <button type="submit">Login</button>
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="log-container">
+    <h1 class="log-h1" >Login</h1>
+    <InputText @bind-Value="loginModel.Username" class="log-input" placeholder="Username"/>
+    <InputText @bind-Value="loginModel.Password" type="password" class="log-input" placeholder="Password" />
+    <button type="submit" class="log-submit" >Login</button>
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <p class="text-danger">@error</p>
+    }
 </EditForm>
 
 @code {
     private LoginModel loginModel = new LoginModel();
-
+    private string error = "";
 
     private async void HandleLogin()
     {
-        var user = await loginService.AuthenticateUser(loginModel.Username, loginModel.Password);
-        if (user != null)
+        var tuple = await loginService.AuthenticateUser(loginModel.Username, loginModel.Password);
+        if (tuple.user != null)
         {
-            var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
-
+            var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(tuple.user);
             NavigationManager.NavigateTo("/");
         }
         else
         {
-            // Handle failed authentication
+            error = tuple.error;
+            StateHasChanged();
         }
     }
 

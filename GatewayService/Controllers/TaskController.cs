@@ -1,6 +1,7 @@
 using GatewayService.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using System.Text.Json;
 
 namespace GatewayService.Controllers
@@ -45,20 +46,32 @@ namespace GatewayService.Controllers
         [HttpPost("create")]
         public async Task<ActionResult> CreateTask(TaskCreateModel task)
         {
+            if (string.IsNullOrWhiteSpace(task.Title))
+                return BadRequest("Title can't be empty.");
+
+            if (task.Deadline < DateTime.Today)
+                return BadRequest("Deadline can't be in the past.");
+
             var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
             if (UserId == null) return Unauthorized();
 
             HttpResponseMessage response = await client.PostAsJsonAsync($"api/Task/create/{UserId}", task);
+            Console.WriteLine("on sait pas");
+            Console.WriteLine(response.Content);
+            Console.WriteLine(response.StatusCode);
 
             // Check if the response status code is 2XX
             if (response.IsSuccessStatusCode)
             {
+                Console.WriteLine("ok");
                 var newTask = await response.Content.ReadFromJsonAsync<Entities.TaskModel>();
                 return Ok(newTask);
             }
             else
             {
+                Console.WriteLine("pas ok");
                 return BadRequest("CreateTask failed");
+
             }
             // Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJDeXJpdXMiLCJVc2VySWQiOiIxIiwibmFtZSI6IkN5cml1cyIsImV4cCI6MTcwMzIwMDUwMSwiaXNzIjoiWW91cklzc3VlciIsImF1ZCI6IllvdXJBdWRpZW5jZSJ9.xIuvzZ8UhPvClf5gP1GY33N-JrMSBUdrtQ6lvTnRJ0I
         }
@@ -67,6 +80,12 @@ namespace GatewayService.Controllers
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateTask(int id, TaskCreateModel task)
         {
+            if (string.IsNullOrWhiteSpace(task.Title))
+                return BadRequest("Title can't be empty.");
+
+            if (task.Deadline < DateTime.Today)
+                return BadRequest("Deadline can't be in the past.");
+
             var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
             if (UserId == null) return Unauthorized();
 
