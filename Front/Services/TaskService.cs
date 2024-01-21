@@ -26,7 +26,7 @@ namespace Front.Services
         {
             try
             {
-                 var token = await _sessionStorage.GetAsync<string>("jwt");
+                var token = await _sessionStorage.GetAsync<string>("jwt");
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
                 HttpResponseMessage response = await _httpClient.GetAsync("http://localhost:5000/api/Task");
