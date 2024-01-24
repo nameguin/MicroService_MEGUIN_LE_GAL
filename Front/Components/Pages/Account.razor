@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider authStateProvider
 @inject UserService userService
+@inject LoginService loginService
 
 <PageTitle>Your Account</PageTitle>
 
@@ -11,24 +12,41 @@
 
         <h1>Account Options</h1>
 
-        <br>
-        <br>
+        <br><br>
 
         @if (user == null)
         {
             <p><em>Your data is being recovered, if the process takes more than 30 seconds, please contact technical support</em></p>
+            Console.WriteLine("test 0");
         }
         else
         {
-            <div>Name : <input type="text" value=@user.Name /></div>
-            <div>Email : <input type="text" value=@user.Email /></div>
-            <div>Password : <input type="text" /></div>
-            <button type="submit">Apply modifications</button>
+            @if (userToModify != null && userToModify.Id == user.Id)
+            {
+                <h3 class="log-h3">Modify your Account</h3>
+                <p><em>Any changes are permanent, if you encounter any problems, please contact technical support</em></p>
+
+                <br>
+
+                <div>Name : <InputText @bind-Value="@userToModify.Name" /></div>
+                <div>Email : <InputText @bind-Value="@userToModify.Email" /></div>
+                <div>Password : <InputText @bind-Value="@userToModify.Password" /></div>
+
+                <br>
+
+                <button class="btn btn-success" @onclick="() => UpdateUser(DTO_To_UpdateModel(user))">Apply modifications</button>
+
+                @if (!string.IsNullOrWhiteSpace(updateErrorMessage))
+                {
+                   <p class="text-danger">@updateErrorMessage</p>
+                }
+            }
         }
 
-        <br>
-        <br>
+        <br><br><br><br>
 
+        <h3 class="log-h3">Delete your Account</h3>
+        <br>
         <button class="btn btn-danger" @onclick="Delete">Delete your account</button>
 
     </Authorized>
@@ -40,10 +58,54 @@
 @code {
 
     private UserDTO? user;
+    private UserUpdateModel? userToModify = null;
+    private string? updateErrorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         user = await userService.GetMyUserDTO();
+        if(user != null)
+        {
+            userToModify = new UserUpdateModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Password = ""
+                };
+        }
+    }
+
+    public UserUpdateModel DTO_To_UpdateModel(UserDTO userDTO)
+    {
+        return new UserUpdateModel() { Id = userDTO.Id, Name = userDTO.Name, Email = userDTO.Email, Password = "" };
+    }
+
+    private async Task UpdateUser(UserUpdateModel user)
+    {
+        updateErrorMessage = string.Empty;
+
+        user.Name = userToModify.Name;
+        user.Email = userToModify.Email;
+        user.Password = userToModify.Password;
+
+        if (user != null)
+        {
+            var errorMessage = await userService.UpdateUser(user);
+            updateErrorMessage = errorMessage;
+
+            var tuple = await loginService.AuthenticateUser(user.Name, user.Password);
+            if (tuple.user != null)
+            {
+                var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(tuple.user);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                updateErrorMessage = tuple.error;
+                StateHasChanged();
+            }
+        }
     }
 
     private async void Delete()

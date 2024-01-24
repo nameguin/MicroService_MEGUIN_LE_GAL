@@ -11,6 +11,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Reflection;
 
 
 namespace GatewayService.Controllers
@@ -31,15 +32,13 @@ namespace GatewayService.Controllers
         [HttpGet("users")]
         public async Task<ActionResult> GetAllUsersAsync()
         {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
             {
                 client.BaseAddress = new System.Uri("http://localhost:5001/");
-
-                /*
-                var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-                if (UserId == null) return Unauthorized();
-                */
 
                 HttpResponseMessage response = await client.GetAsync($"api/Users");
 
@@ -60,13 +59,13 @@ namespace GatewayService.Controllers
         [HttpGet]
         public async Task<ActionResult<UserDTO>> GetMyUserAsync()
         {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
             {
                 client.BaseAddress = new System.Uri("http://localhost:5001/");
-
-                var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-                if (UserId == null) return Unauthorized();
 
                 HttpResponseMessage response = await client.GetAsync($"api/Users/{UserId}");
 
@@ -87,17 +86,17 @@ namespace GatewayService.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<JWTAndUser>> Login(UserLogin model)
         {
-            if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("The username must only contain alphanumeric characters.");
-
-            if (!model.Pass.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("The password must only contain alphanumeric characters.");
-
             if (string.IsNullOrWhiteSpace(model.Name))
                 return BadRequest("Username can't be empty.");
 
             if (string.IsNullOrWhiteSpace(model.Pass))
                 return BadRequest("Password can't be empty.");
+
+            if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The username must only contain alphanumeric characters.");
+
+            if (!model.Pass.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The password must only contain alphanumeric characters.");
 
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
@@ -128,13 +127,6 @@ namespace GatewayService.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserCreateModel model)
         {
-
-            if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("The username must only contain alphanumeric characters.");
-
-            if (!model.Password.All(c => Char.IsLetterOrDigit(c)))
-                return BadRequest("The password must only contain alphanumeric characters.");
-
             if (string.IsNullOrWhiteSpace(model.Name))
                 return BadRequest("Username can't be empty.");
 
@@ -143,6 +135,12 @@ namespace GatewayService.Controllers
 
             if (string.IsNullOrWhiteSpace(model.Email))
                 return BadRequest("Mail can't be empty.");
+
+            if (!model.Name.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The username must only contain alphanumeric characters.");
+
+            if (!model.Password.All(c => Char.IsLetterOrDigit(c)))
+                return BadRequest("The password must only contain alphanumeric characters.");
 
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
@@ -201,11 +199,61 @@ namespace GatewayService.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        // PUT : api/User/5
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAccount(int id, UserUpdateModel userUdpate)
+        {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
+            using (HttpClient client = new HttpClient())
+            {
+                if (userUdpate != null) {
+                    if (string.IsNullOrWhiteSpace(userUdpate.Name))
+                        return BadRequest("Username can't be empty.");
+
+                    if (string.IsNullOrWhiteSpace(userUdpate.Password))
+                        return BadRequest("Password can't be empty.");
+
+                    if (string.IsNullOrWhiteSpace(userUdpate.Email))
+                        return BadRequest("Mail can't be empty.");
+
+                    if (!userUdpate.Name.All(c => Char.IsLetterOrDigit(c)))
+                        return BadRequest("The username must only contain alphanumeric characters.");
+
+                    if (!userUdpate.Password.All(c => Char.IsLetterOrDigit(c)))
+                        return BadRequest("The password must only contain alphanumeric characters.");
+                }
+                else
+                {
+                    return BadRequest("Form sended is empty. Request aborted");
+                }
+
+                // Envoie la requête HTTP PUT
+                HttpResponseMessage response = await client.PutAsJsonAsync($"http://localhost:5001/api/Users/{id}", userUdpate);
+
+                // Vérifie la réponse
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("UpdateAccount failed");
+
+                }
+            }
+        }
+
         // DELETE : api/User/5
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
             using (HttpClient client = new HttpClient())
             {
                 // Concaténez l'ID à l'URL de l'API

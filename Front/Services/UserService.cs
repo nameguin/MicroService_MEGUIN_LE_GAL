@@ -76,5 +76,34 @@ namespace Front.Services
             }
         }
 
+        public async Task<string> UpdateUser(UserUpdateModel userNewInfo)
+        {
+            var token = await _sessionStorage.GetAsync<string>("jwt");
+
+            if (token.Success)
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+
+                var userUpdate = new UserUpdateModel() { Id = userNewInfo.Id, Name = userNewInfo.Name, Email = userNewInfo.Email, Password = userNewInfo.Password };
+
+                HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/User/{userNewInfo.Id}", userUpdate);
+
+                Console.WriteLine(response.Content.ToString());
+                Console.WriteLine(response.StatusCode);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return "";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    return error;
+                }
+            }
+            Console.WriteLine("Erreur : Token JWT impossible à récupérer");
+            return "Invalid Token";
+        }
+
     }
 }

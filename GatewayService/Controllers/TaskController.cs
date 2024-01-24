@@ -46,14 +46,14 @@ namespace GatewayService.Controllers
         [HttpPost("create")]
         public async Task<ActionResult> CreateTask(TaskCreateModel task)
         {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
             if (string.IsNullOrWhiteSpace(task.Title))
                 return BadRequest("Title can't be empty.");
 
             if (task.Deadline < DateTime.Today)
                 return BadRequest("Deadline can't be in the past.");
-
-            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            if (UserId == null) return Unauthorized();
 
             HttpResponseMessage response = await client.PostAsJsonAsync($"api/Task/create/{UserId}", task);
             Console.WriteLine("on sait pas");
@@ -80,14 +80,14 @@ namespace GatewayService.Controllers
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateTask(int id, TaskCreateModel task)
         {
+            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (UserId == null) return Unauthorized();
+
             if (string.IsNullOrWhiteSpace(task.Title))
                 return BadRequest("Title can't be empty.");
 
             if (task.Deadline < DateTime.Today)
                 return BadRequest("Deadline can't be in the past.");
-
-            var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            if (UserId == null) return Unauthorized();
 
             HttpResponseMessage response = await client.PutAsJsonAsync($"api/Task/update/{UserId}/{id}", task);
 

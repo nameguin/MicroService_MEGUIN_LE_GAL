@@ -51,7 +51,6 @@ namespace Front.Services
 
         public async Task<(TaskModel? task, string? error)> CreateTask(string title, string? description, DateTime deadline)
         {
-            var jwt = await _sessionStorage.GetAsync<string>("jwt");
             var token = await _sessionStorage.GetAsync<string>("jwt");
 
             if (token.Success)
@@ -93,8 +92,6 @@ namespace Front.Services
 
                 var task = new TaskCreateModel() { IsDone = todo.IsDone, Title = todo.Title, Description = todo.Description, Deadline = todo.Deadline };
 
-                var jwt = await _sessionStorage.GetAsync<string>("jwt");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.Value);
                 HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/Task/update/{todo.Id}", task);
 
                 Console.WriteLine(response.Content.ToString());
