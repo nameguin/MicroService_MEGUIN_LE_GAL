@@ -1,0 +1,82 @@
+﻿@page "/admin"
+@inject UserService userService
+@inject AuthenticationStateProvider authStateProvider
+@inject Microsoft.JSInterop.IJSRuntime JSRuntime
+
+<PageTitle>Admin Page</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
+        <h1>Admin Page</h1>
+
+        <br><br>
+
+        @if (users == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <h3>Users List</h3>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Administrator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td><p>@user.Name</p></td>
+                            <td><p>@user.Email</p></td>
+                            @if (user.isAdmin){ <td><p>Yes</p></td> }
+                            else { <td><p>No</p></td> }
+
+                            @if (user.isAdmin)
+                            {
+                                <td>
+                                    <button class="btn btn-secondary" disabled="true">X</button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <button class="btn btn-danger" @onclick="() => Delete(user.Id)">X</button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </Authorized>
+
+    <NotAuthorized>
+        You are not an administrator
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private UserDTO[]? users;
+    private string? updateErrorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userService.GetAllUsers();
+    }
+
+    private async void Delete(int id)
+    {
+        if (users == null) return;
+        await ((CustomAuthenticationStateProvider)authStateProvider).DeleteAccount(id, false);
+        users = users.Where(u => u.Id != id).ToArray();
+        StateHasChanged();
+    }
+}

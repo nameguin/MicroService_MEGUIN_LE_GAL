@@ -53,13 +53,4 @@
         NavigationManager.NavigateTo("/login");
         
     }
-
-    private async void Delete()
-    {
-        // Kill the account
-        await((CustomAuthenticationStateProvider)authStateProvider).DeleteAccount();
-        // Redirect the user to the login page
-        NavigationManager.NavigateTo("/register");
-        
-    }
 }

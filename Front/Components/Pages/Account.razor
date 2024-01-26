@@ -121,8 +121,9 @@
 
     private async void Delete()
     {
-        // Kill the account
-        await ((CustomAuthenticationStateProvider)authStateProvider).DeleteAccount();
+        if (user == null) return;
+        await ((CustomAuthenticationStateProvider)authStateProvider).DeleteAccount(user.Id, true);
+
         // Redirect the user to the register page
         NavigationManager.NavigateTo("/register");
 
