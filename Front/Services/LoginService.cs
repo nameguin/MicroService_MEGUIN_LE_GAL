@@ -40,6 +40,7 @@ namespace Front.Services
                 if (result != null && result.User != null)
                 {
                     await _sessionStorage.SetAsync("jwt", result.Token);
+                    Console.WriteLine("Le token est : " + result.Token.ToString());
                     return (result.User, "");
                 }
             }

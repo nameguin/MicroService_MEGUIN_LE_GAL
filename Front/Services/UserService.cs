@@ -22,14 +22,14 @@ namespace Front.Services
             _sessionStorage = sessionStorage;
         }
 
-        public async Task<UserDTO[]?> GetAllUsers()
+        public async Task<UserDTO[]> GetAllUsers()
         {
             try
             {
                 var token = await _sessionStorage.GetAsync<string>("jwt");
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
-                HttpResponseMessage response = await _httpClient.GetAsync("http://localhost:5000/api/User");
+                HttpResponseMessage response = await _httpClient.GetAsync("http://localhost:5000/api/User/users");
 
                 if (response.IsSuccessStatusCode)
                 {

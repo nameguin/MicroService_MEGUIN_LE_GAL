@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Data;
 
 namespace Front.Services
 {
@@ -23,10 +24,24 @@ namespace Front.Services
         public async Task<ClaimsPrincipal> MarkUserAsAuthenticated(UserDTO user)
         {
             await _sessionStorage.SetAsync("User", user);
-            var claims = new[] {
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, "User")
-            };
+
+            Claim[]? claims = null;
+            if (user.isAdmin)
+            {
+                claims = new[] {
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim(ClaimTypes.Role, "User")
+                };
+                
+            }
+            else
+            {
+                claims = new[] {
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.Role, "User")
+                };
+            }
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             _currentUser = new ClaimsPrincipal(identity);
 
@@ -44,13 +59,15 @@ namespace Front.Services
             return _currentUser;
         }
 
-        public async Task<ClaimsPrincipal> DeleteAccount()
+        public async Task<ClaimsPrincipal> DeleteAccount(int id, bool deconnection)
         {
             var userSession = await _sessionStorage.GetAsync<UserDTO>("User");
             if (userSession.Success && userSession.Value != null)
             {
-                var user = userSession.Value;
-                await _sessionStorage.DeleteAsync("User");
+                if (deconnection)
+                {
+                    await _sessionStorage.DeleteAsync("User");
+                }
 
                 using (HttpClient client = new HttpClient())
                 {
@@ -60,7 +77,7 @@ namespace Front.Services
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
                         // Concaténez l'ID à l'URL de l'API
-                        string urlWithId = $"http://localhost:5000/api/User/{user.Id}";
+                        string urlWithId = $"http://localhost:5000/api/User/{id}";
 
                         // Envoie la requête HTTP DELETE
                         HttpResponseMessage response = await client.DeleteAsync(urlWithId);
@@ -68,7 +85,7 @@ namespace Front.Services
                         // Vérifie la réponse
                         if (response.IsSuccessStatusCode)
                         {
-                            Console.WriteLine($"Suppression réussie pour l'ID {user.Id}");
+                            Console.WriteLine($"Suppression réussie pour l'ID {id}");
                         }
                         else
                         {
@@ -83,8 +100,11 @@ namespace Front.Services
                 }
             }
 
-            _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            if (deconnection)
+            {
+                _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            }
 
 
             return _currentUser;
@@ -96,10 +116,23 @@ namespace Front.Services
             if(userSession.Success && userSession.Value != null)
             {
                 var user = userSession.Value;
-                var claims = new[] {
+                Claim[]? claims = null;
+            if (user.isAdmin)
+            {
+                claims = new[] {
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim(ClaimTypes.Role, "User")
+                };
+                
+            }
+            else
+            {
+                claims = new[] {
                     new Claim(ClaimTypes.Name, user.Name),
                     new Claim(ClaimTypes.Role, "User")
                 };
+            }
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 _currentUser = new ClaimsPrincipal(identity);
             } else {
