@@ -49,9 +49,9 @@ namespace UserService.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateModel userUdpate)
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateModel userUpdate)
         {
-            if (id != userUdpate.Id)
+            if (id != userUpdate.Id)
             {
                 return BadRequest();
             }
@@ -63,12 +63,31 @@ namespace UserService.Controllers
                 return NotFound();
             }
 
-            if(userUdpate.Name != null) user.Name = userUdpate.Name;
-            if(userUdpate.Email != null) user.Email = userUdpate.Email;
-            user.isAdmin = userUdpate.isAdmin;
+            var userNameExist = await _context.User
+                .Where(u => u.Name == userUpdate.Name && u.Id != userUpdate.Id)
+                .Select(u => UserToDTO(u))
+                .FirstOrDefaultAsync();
 
-            if (userUdpate.Password != null) {
-                user.PasswordHash = _passwordHasher.HashPassword(user, userUdpate.Password);
+            var userEmailExist = await _context.User
+                .Where(u => u.Email == userUpdate.Email && u.Id != userUpdate.Id)
+                .Select(u => UserToDTO(u))
+                .FirstOrDefaultAsync();
+
+            if (userNameExist != null)
+            {
+                return BadRequest("Update failed, this name is already used.");
+            }
+            else if (userEmailExist != null)
+            {
+                return BadRequest("Update failed, this email is already used.");
+            }
+
+            if (userUpdate.Name != null) user.Name = userUpdate.Name;
+            if(userUpdate.Email != null) user.Email = userUpdate.Email;
+            user.isAdmin = userUpdate.isAdmin;
+
+            if (userUpdate.Password != null) {
+                user.PasswordHash = _passwordHasher.HashPassword(user, userUpdate.Password);
             }
 
             _context.Entry(user).State = EntityState.Modified;
@@ -105,10 +124,30 @@ namespace UserService.Controllers
             Console.WriteLine(userPayload.Name + " " + userPayload.Password);
             user.PasswordHash = _passwordHasher.HashPassword(user, userPayload.Password);
 
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
+            var userNameExist = await _context.User
+                .Where(u => u.Name == user.Name)
+                .Select(u => UserToDTO(u))
+                .FirstOrDefaultAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, UserToDTO(user));
+            var userEmailExist = await _context.User
+                .Where(u => u.Email == user.Email)
+                .Select(u => UserToDTO(u))
+                .FirstOrDefaultAsync();
+
+            if (userNameExist != null)
+            {
+                return BadRequest("Register failed, this name is already used.");
+            }
+            else if (userEmailExist != null)
+            {
+                return BadRequest("Register failed, this email is already used.");
+            }
+            else
+            {
+                _context.User.Add(user);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction("GetUser", new { id = user.Id }, UserToDTO(user));
+            }
         }
 
         // POST: api/Users/login

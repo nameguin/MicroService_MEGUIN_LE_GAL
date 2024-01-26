@@ -18,31 +18,30 @@ else
 
     @if (showAddTaskForm)
     {
-        <div class="add-task-form">
-            <div class="input-add-task-form">
-                <div class="input-add-form">
-                    <label for="TaskTitle">Title:</label>
-                    <InputText id="TaskTitle" @bind-Value="@newTaskTitle" />
-                </div>
-                <div class="input-add-form">
-                    <label for="TaskDeadline">Deadline:</label>
-                    <InputDate id="TaskDeadline" @bind-Value="@newTaskDeadline" />
-                </div>
+        <div class="form-container">
+            <div class="input-form">
+                <label for="TaskTitle">Title:</label>
+                <InputText id="TaskTitle" @bind-Value="@newTaskTitle" />
             </div>
-            <div>
+            <div class="input-form">
+                <label for="TaskDeadline">Deadline:</label>
+                <InputDate id="TaskDeadline" @bind-Value="@newTaskDeadline" />
+            </div>
+            <div class="input-form">
                 <label for="TaskDescription">Description:</label>
-                <InputTextArea id="TaskDescription" @bind-Value="@newTaskDescription" />
+                <InputTextArea @bind-Value="@newTaskDescription" />
             </div>
+
             <button class="btn btn-success" @onclick="addTask">Save</button>
 
             @if (!string.IsNullOrWhiteSpace(addErrorMessage))
             {
-                <p class="text-danger" style="margin-left:10px">@addErrorMessage</p>
+                <p class="text-danger" style="margin-top:10px">@addErrorMessage</p>
             }
         </div>
     }
 
-    <div class="sort-menu" style="margin: 10px">
+    <div class="sort-menu" style="margin-left: 10px">
         <label for="sortOption">Sort by:</label>
         <select id="sortOption" @onchange=" SortTasksList">
             <option value="Date" selected>Date</option>
@@ -180,6 +179,9 @@ else
             tasksList.Add(tuple.task);
             tasks = tasksList.ToArray();
             await SortTasksList();
+            newTaskTitle = string.Empty;
+            newTaskDescription = string.Empty;
+            newTaskDeadline = DateTime.Today;
         }
         else
         {

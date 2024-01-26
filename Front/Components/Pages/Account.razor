@@ -12,26 +12,16 @@
 
         <h1>Account Options</h1>
 
-        <br><br>
+        <br>
 
         @if (user == null)
         {
             <p><em>Your data is being recovered, if the process takes more than 30 seconds, please contact technical support</em></p>
-            Console.WriteLine("test 0");
         }
         else
         {
             @if (userToModify != null && userToModify.Id == user.Id)
             {
-                <h3 class="log-h3">Modify your Account</h3>
-                <p><em>Any changes are permanent, if you encounter any problems, please contact technical support</em></p>
-
-                <br>
-
-                <div>Name : <InputText @bind-Value="@userToModify.Name" /></div>
-                <div>Email : <InputText @bind-Value="@userToModify.Email" /></div>
-                <div>Password : <InputText @bind-Value="@userToModify.Password" /></div>
-
                 @if (userToModify.isAdmin)
                 {
                     <p><em>Test : Vous êtes administrateur (si vous voyez ce message, c'est que les devs ont oublié de l'enlever)</em></p>
@@ -41,22 +31,40 @@
                     <p><em>Test : Vous n'êtes pas administrateur (si vous voyez ce message, c'est que les devs ont oublié de l'enlever)</em></p>
                 }
 
-                <br>
+                <div class="form-container">
+                    <h3 class="log-h3">Modify your Account</h3>
+                    <p><em>Any changes are permanent, if you encounter any problems, please contact technical support</em></p>
 
-                <button class="btn btn-success" @onclick="() => UpdateUser(DTO_To_UpdateModel(user))">Apply modifications</button>
+                    <div class="input-form">
+                        <label for="TaskTitle">Name:</label>
+                        <InputText @bind-Value="@userToModify.Name" />
+                    </div>
+                    <div class="input-form">
+                        <label for="TaskTitle">Password:</label>
+                        <InputText @bind-Value="@userToModify.Password" />
+                    </div>
+                    <div class="input-form">
+                        <label for="TaskTitle">Email:</label>
+                        <InputText type="email" @bind-Value="@userToModify.Email" />
+                    </div>
 
-                @if (!string.IsNullOrWhiteSpace(updateErrorMessage))
-                {
-                   <p class="text-danger">@updateErrorMessage</p>
-                }
+                    <button @onclick ="() => UpdateUser(DTO_To_UpdateModel(user))" class="btn btn-success">Apply modifications</button>
+
+                    @if (!string.IsNullOrWhiteSpace(updateErrorMessage))
+                    {
+                        <p class="text-danger" style="margin-top:10px">@updateErrorMessage</p>
+                    }
+                </div>
+            
             }
         }
 
-        <br><br><br><br>
-
-        <h3 class="log-h3">Delete your Account</h3>
         <br>
-        <button class="btn btn-danger" @onclick="Delete">Delete your account</button>
+         <div class="form-container">
+            <h3 class="log-h3">Delete your Account</h3>
+            <br>
+            <button class="btn btn-danger" @onclick="Delete">Delete your account</button>
+        </div>
 
     </Authorized>
     <NotAuthorized>
@@ -86,12 +94,17 @@
         }
     }
 
+    private async Task HandleSubmit()
+    {
+        await UpdateUser(DTO_To_UpdateModel(user));
+    }
+
     public UserUpdateModel DTO_To_UpdateModel(UserDTO userDTO)
     {
         return new UserUpdateModel() { Id = userDTO.Id, Name = userDTO.Name, Email = userDTO.Email, Password = "", isAdmin = userDTO.isAdmin };
     }
 
-    private async Task UpdateUser(UserUpdateModel user)
+    private async Task UpdateUser(UserUpdateModel? user)
     {
         updateErrorMessage = string.Empty;
 
@@ -106,6 +119,7 @@
             updateErrorMessage = errorMessage;
 
             var tuple = await loginService.AuthenticateUser(user.Name, user.Password);
+
             if (tuple.user != null)
             {
                 var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(tuple.user);
@@ -113,8 +127,11 @@
             }
             else
             {
-                updateErrorMessage = tuple.error;
-                StateHasChanged();
+                if(errorMessage == "")
+                {
+                    updateErrorMessage = tuple.error;
+                    StateHasChanged();
+                }
             }
         }
     }

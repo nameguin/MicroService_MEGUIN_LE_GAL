@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.SignalR;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
 
 
 namespace GatewayService.Controllers
@@ -127,6 +129,8 @@ namespace GatewayService.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserCreateModel model)
         {
+            string emailPattern = @"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
+
             if (string.IsNullOrWhiteSpace(model.Name))
                 return BadRequest("Username can't be empty.");
 
@@ -141,6 +145,9 @@ namespace GatewayService.Controllers
 
             if (!model.Password.All(c => Char.IsLetterOrDigit(c)))
                 return BadRequest("The password must only contain alphanumeric characters.");
+
+            if (!Regex.IsMatch(model.Email, emailPattern))
+                return BadRequest("Mail is invalid.");
 
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
@@ -160,7 +167,8 @@ namespace GatewayService.Controllers
                 }
                 else
                 {
-                    return BadRequest("Register failed");
+                    var error = await response.Content.ReadAsStringAsync();
+                    return BadRequest(error);
                 }
             }
         }
@@ -202,28 +210,32 @@ namespace GatewayService.Controllers
         // PUT : api/User/5
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAccount(int id, UserUpdateModel userUdpate)
+        public async Task<IActionResult> UpdateAccount(int id, UserUpdateModel userUpdate)
         {
             var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
             if (UserId == null) return Unauthorized();
 
+            string emailPattern = @"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
             using (HttpClient client = new HttpClient())
             {
-                if (userUdpate != null) {
-                    if (string.IsNullOrWhiteSpace(userUdpate.Name))
+                if (userUpdate != null) {
+                    if (string.IsNullOrWhiteSpace(userUpdate.Name))
                         return BadRequest("Username can't be empty.");
 
-                    if (string.IsNullOrWhiteSpace(userUdpate.Password))
+                    if (string.IsNullOrWhiteSpace(userUpdate.Password))
                         return BadRequest("Password can't be empty.");
 
-                    if (string.IsNullOrWhiteSpace(userUdpate.Email))
+                    if (string.IsNullOrWhiteSpace(userUpdate.Email))
                         return BadRequest("Mail can't be empty.");
 
-                    if (!userUdpate.Name.All(c => Char.IsLetterOrDigit(c)))
+                    if (!userUpdate.Name.All(c => Char.IsLetterOrDigit(c)))
                         return BadRequest("The username must only contain alphanumeric characters.");
 
-                    if (!userUdpate.Password.All(c => Char.IsLetterOrDigit(c)))
+                    if (!userUpdate.Password.All(c => Char.IsLetterOrDigit(c)))
                         return BadRequest("The password must only contain alphanumeric characters.");
+
+                    if(!Regex.IsMatch(userUpdate.Email, emailPattern))
+                        return BadRequest("Mail is invalid.");
                 }
                 else
                 {
@@ -231,7 +243,7 @@ namespace GatewayService.Controllers
                 }
 
                 // Envoie la requête HTTP PUT
-                HttpResponseMessage response = await client.PutAsJsonAsync($"http://localhost:5001/api/Users/{id}", userUdpate);
+                HttpResponseMessage response = await client.PutAsJsonAsync($"http://localhost:5001/api/Users/{id}", userUpdate);
 
                 // Vérifie la réponse
                 if (response.IsSuccessStatusCode)
@@ -240,7 +252,8 @@ namespace GatewayService.Controllers
                 }
                 else
                 {
-                    return BadRequest("UpdateAccount failed");
+                    var error = await response.Content.ReadAsStringAsync();
+                    return BadRequest(error);
 
                 }
             }

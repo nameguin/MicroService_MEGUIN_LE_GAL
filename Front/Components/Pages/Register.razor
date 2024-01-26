@@ -6,7 +6,7 @@
     <h1 class="log-h1">Register</h1>
     <InputText @bind-Value="registerModel.Username" class="log-input" placeholder="Username" />
     <InputText @bind-Value="registerModel.Password" type="password" class="log-input" placeholder="Password" />
-    <InputText @bind-Value="registerModel.Email" type="email" class="log-input" placeholder="xxx@example.com" />
+    <InputText @bind-Value="registerModel.Email" class="log-input" placeholder="xxx@example.com" />
     <button type="submit" class="log-submit">Submit</button>
     @if (!string.IsNullOrWhiteSpace(error))
     {

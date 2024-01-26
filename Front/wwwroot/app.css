@@ -61,61 +61,6 @@ h1:focus {
     word-wrap: break-word;
 }
 
-.add-task-form {
-    width: 30%;
-    padding: 15px;
-    margin-top: -10px;
-}
-.input-add-task-form {
-    display: flex;
-    flex-direction: column;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-}
-
-.input-add-form {
-    width: 50%;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-}
-    .input-add-form label {
-        margin-bottom: 5px;
-    }
-
-    .input-add-form input {
-        padding: 10px;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-    }
-.add-task-form textarea {
-    margin-left: 10px;
-    margin-bottom: 10px;
-    width: 82%;
-    box-sizing: border-box;
-}
-
-.add-task-form label {
-    margin-left: 10px;
-}
-
-.add-task-form button {
-    margin-left: 10px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    width: 30%;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-
-.add-task-form button:hover {
-    background-color: #218838;
-}
-
 .log-container {
     margin: auto;
     max-width: 400px;
@@ -154,4 +99,33 @@ h1:focus {
     margin-bottom: 20px;
 }
 
+.form-container {
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.input-form {
+    margin-bottom: 15px;
+}
+
+    .input-form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .input-form input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .input-form TextArea {
+        width: 100%;
+    }
 
