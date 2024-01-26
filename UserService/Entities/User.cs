@@ -7,13 +7,14 @@ namespace UserService.Entities
     public class User
     {
         public int Id { get; set; }
-        public string? Name { get; set;}
-        public string? Email { get; set;}
+        public string? Name { get; set; }
+        public string? Email { get; set; }
         public string? PasswordHash { get; set; }
+        public bool isAdmin { get; set; }
 
         public override string ToString()
         {
-            return $"Id: ${Id} Name: ${Name} Email : ${Email} Pass: ${PasswordHash}";
+            return $"Id: ${Id} Name: ${Name} Email : ${Email} Pass: ${PasswordHash} Admin : ${isAdmin}";
         }
     }
 
@@ -22,6 +23,7 @@ namespace UserService.Entities
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
+        public bool isAdmin { get; set; }
     }
 
     public class UserCreateModel
@@ -29,6 +31,7 @@ namespace UserService.Entities
         public required string Password { get; set; }
         public required string Name { get; set; }
         public required string Email { get; set; }
+        public bool isAdmin { get; set; }
     }
 
     public class UserUpdateModel
@@ -37,6 +40,7 @@ namespace UserService.Entities
         public string? Password { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
+        public bool isAdmin { get; set; }
     }
     public class UserLogin
     {

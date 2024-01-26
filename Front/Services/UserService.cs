@@ -84,7 +84,7 @@ namespace Front.Services
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
 
-                var userUpdate = new UserUpdateModel() { Id = userNewInfo.Id, Name = userNewInfo.Name, Email = userNewInfo.Email, Password = userNewInfo.Password };
+                var userUpdate = new UserUpdateModel() { Id = userNewInfo.Id, Name = userNewInfo.Name, Email = userNewInfo.Email, Password = userNewInfo.Password, isAdmin = userNewInfo.isAdmin };
 
                 HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"http://localhost:5000/api/User/{userNewInfo.Id}", userUpdate);
 

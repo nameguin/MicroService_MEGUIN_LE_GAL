@@ -32,6 +32,15 @@
                 <div>Email : <InputText @bind-Value="@userToModify.Email" /></div>
                 <div>Password : <InputText @bind-Value="@userToModify.Password" /></div>
 
+                @if (userToModify.isAdmin)
+                {
+                    <p><em>Test : Vous êtes administrateur (si vous voyez ce message, c'est que les devs ont oublié de l'enlever)</em></p>
+                }
+                else
+                {
+                    <p><em>Test : Vous n'êtes pas administrateur (si vous voyez ce message, c'est que les devs ont oublié de l'enlever)</em></p>
+                }
+
                 <br>
 
                 <button class="btn btn-success" @onclick="() => UpdateUser(DTO_To_UpdateModel(user))">Apply modifications</button>
@@ -71,14 +80,15 @@
                     Id = user.Id,
                     Name = user.Name,
                     Email = user.Email,
-                    Password = ""
+                    Password = "",
+                    isAdmin = user.isAdmin
                 };
         }
     }
 
     public UserUpdateModel DTO_To_UpdateModel(UserDTO userDTO)
     {
-        return new UserUpdateModel() { Id = userDTO.Id, Name = userDTO.Name, Email = userDTO.Email, Password = "" };
+        return new UserUpdateModel() { Id = userDTO.Id, Name = userDTO.Name, Email = userDTO.Email, Password = "", isAdmin = userDTO.isAdmin };
     }
 
     private async Task UpdateUser(UserUpdateModel user)
@@ -88,6 +98,7 @@
         user.Name = userToModify.Name;
         user.Email = userToModify.Email;
         user.Password = userToModify.Password;
+        user.isAdmin = userToModify.isAdmin;
 
         if (user != null)
         {

@@ -24,6 +24,7 @@ namespace Front.Services
                 Password = password,
                 Name = username,
                 Email = email,
+                isAdmin = false,
             };
             
             var response = await _httpClient.PostAsJsonAsync("http://localhost:5000/api/User/register", userregister);

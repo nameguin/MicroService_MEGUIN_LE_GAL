@@ -65,8 +65,9 @@ namespace UserService.Controllers
 
             if(userUdpate.Name != null) user.Name = userUdpate.Name;
             if(userUdpate.Email != null) user.Email = userUdpate.Email;
+            user.isAdmin = userUdpate.isAdmin;
 
-            if(userUdpate.Password != null) {
+            if (userUdpate.Password != null) {
                 user.PasswordHash = _passwordHasher.HashPassword(user, userUdpate.Password);
             }
 
@@ -99,6 +100,7 @@ namespace UserService.Controllers
             {
                 Email = userPayload.Email,
                 Name = userPayload.Name,
+                isAdmin = userPayload.isAdmin,
             };
             Console.WriteLine(userPayload.Name + " " + userPayload.Password);
             user.PasswordHash = _passwordHasher.HashPassword(user, userPayload.Password);
@@ -166,6 +168,7 @@ namespace UserService.Controllers
                 Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
+                isAdmin = user.isAdmin,
             };
         }
     }
